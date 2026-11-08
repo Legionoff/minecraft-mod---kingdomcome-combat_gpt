@@ -223,11 +223,6 @@ for path in sorted(skill_dir.glob("*.json")):
     data = json.loads(path.read_text(encoding="utf-8"))
     books.append(data.get("id", path.stem))
 
-recipe = {"type": "kingdom_come_combat:combat_manual"}
-recipe_path = GENERATED / "data/kingdom_come_combat/recipe/combat_manual.json"
-recipe_path.parent.mkdir(parents=True, exist_ok=True)
-recipe_path.write_text(json.dumps(recipe, indent=2) + "\n", encoding="utf-8")
-
 for level, cost in ((2, 14), (4, 22), (5, 32)):
     values = []
     for book_id in books:
