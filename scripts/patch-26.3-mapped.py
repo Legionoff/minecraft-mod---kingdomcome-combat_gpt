@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply API moves that are not covered by the Yarn -> Mojang mapping migration."""
+"""Apply API moves not covered by the Yarn -> Mojang mapping migration."""
 from pathlib import Path
 import json
 import re
@@ -10,42 +10,58 @@ MAIN = ROOT / "build/26.3-remapped/main"
 CLIENT = ROOT / "build/26.3-remapped/client"
 GENERATED = ROOT / "build/26.3-generated-resources"
 
+
 def ensure_import(source: str, import_line: str) -> str:
     if import_line not in source:
         source = source.replace("\nimport ", "\n" + import_line + "\nimport ", 1)
     return source
 
+
 ENTITY_TYPE_CONSTANTS = (
-    "HORSE", "CAMEL", "SKELETON", "STRAY", "WITHER_SKELETON", "ZOMBIE", "HUSK",
-    "DROWNED", "ZOMBIFIED_PIGLIN", "PIGLIN", "PIGLIN_BRUTE", "PILLAGER", "VINDICATOR",
-    "EVOKER", "ILLUSIONER", "WITCH", "VILLAGER", "WANDERING_TRADER",
+    "ARMOR_STAND", "BOGGED", "CAMEL", "CAT", "CAVE_SPIDER", "CHICKEN", "COW", "CREEPER",
+    "DONKEY", "DROWNED", "EVOKER", "FOX", "GIANT", "GOAT", "HORSE", "HUSK", "ILLUSIONER",
+    "LLAMA", "MOOSHROOM", "MULE", "OCELOT", "PANDA", "PARROT", "PHANTOM", "PIG", "PIGLIN",
+    "PIGLIN_BRUTE", "PILLAGER", "POLAR_BEAR", "RABBIT", "RAVAGER", "SHEEP", "SKELETON",
+    "SKELETON_HORSE", "SPIDER", "STRAY", "TRADER_LLAMA", "VILLAGER", "VINDICATOR",
+    "WANDERING_TRADER", "WITCH", "WITHER_SKELETON", "WOLF", "ZOMBIE", "ZOMBIE_HORSE",
+    "ZOMBIE_VILLAGER", "ZOMBIFIED_PIGLIN",
 )
 
 for folder in (MAIN, CLIENT):
     for path in folder.rglob("*.java"):
         s = path.read_text(encoding="utf-8")
-        s = s.replace(".getWorld()", ".level()")
-        s = s.replace(".getTime()", ".getGameTime()")
-        s = s.replace(".getOverworld()", ".overworld()")
-        s = s.replace(".getAdvancementLoader()", ".getAdvancements()")
-        s = s.replace(".getEntityById(", ".getEntity(")
-        s = s.replace(".getVelocity()", ".getDeltaMovement()")
-        s = s.replace(".getLightLevel(", ".getMaxLocalRawBrightness(")
-        s = re.sub(r"\.getEntitiesByClass\((\w+\.class),", r".getEntities(EntityTypeTest.forClass(\1),", s)
-        if ".getEntities(EntityTypeTest.forClass(" in s:
-            s = ensure_import(s, "import net.minecraft.world.level.entity.EntityTypeTest;")
-        s = s.replace(".getDamageSources()", ".damageSources()")
-        s = s.replace(".getOtherEntities(", ".getEntities(")
-        s = s.replace(".squaredDistanceTo(", ".distanceToSqr(")
-        s = s.replace(".raycast(", ".clip(")
-        s = s.replace(".dotProduct(", ".dot(")
-        s = s.replace(".displayClientMessage(", ".sendSystemMessage(")
-        s = s.replace(".velocityModified", ".needsSync")
-        s = s.replace(".hasPermissionLevel(", ".hasPermission(")
-        s = s.replace(".isClient()", ".isClientSide()")
+        replacements = {
+            ".getWorld()": ".level()",
+            ".getTime()": ".getGameTime()",
+            ".getOverworld()": ".overworld()",
+            ".getAdvancementLoader()": ".getAdvancements()",
+            ".getEntityById(": ".getEntity(",
+            ".getVelocity()": ".getDeltaMovement()",
+            ".getLightLevel(": ".getMaxLocalRawBrightness(",
+            ".getEntitiesByClass(": ".getEntitiesOfClass(",
+            ".getDamageSources()": ".damageSources()",
+            ".getOtherEntities(": ".getEntities(",
+            ".squaredDistanceTo(": ".distanceToSqr(",
+            ".raycast(": ".clip(",
+            ".dotProduct(": ".dot(",
+            ".displayClientMessage(": ".sendSystemMessage(",
+            ".velocityModified": ".needsSync",
+            ".hasPermissionLevel(": ".hasPermission(",
+            ".isClient()": ".isClientSide()",
+            ".getClosestPlayer(": ".getNearestPlayer(",
+            ".isSpaceEmpty(": ".noCollision(",
+            ".expand(": ".inflate(",
+            ".canHit()": ".isPickable()",
+            ".isConnectedThroughVehicle(": ".isPassengerOfSameVehicle(",
+            ".addVelocity(": ".push(",
+            ".setOnFireFor(": ".igniteForSeconds(",
+            ".playS2C()": ".clientboundPlay()",
+            ".playC2S()": ".serverboundPlay()",
+        }
+        for old, new in replacements.items():
+            s = s.replace(old, new)
         s = re.sub(r"\.isClientSide(?!\()", ".isClientSide()", s)
         s = re.sub(r"\.isClient\b", ".isClientSide()", s)
-        s = s.replace("net.minecraft.world.entity.monster.EnderMan", "net.minecraft.world.entity.monster.Enderman")
         s = s.replace("EnderMan", "Enderman")
         s = s.replace("net.minecraft.world.entity.monster.Slime;", "net.minecraft.world.entity.monster.cubemob.Slime;")
         s = s.replace("net.minecraft.server.world.ServerWorld", "net.minecraft.server.level.ServerLevel")
@@ -60,22 +76,13 @@ for folder in (MAIN, CLIENT):
             "player.level().getServer().getGlobalGameRules().get(GameRules.PVP)"
         )
         s = s.replace(".getType().is(", ".getType().builtInRegistryHolder().is(")
-        for receiver in ("this", "player", "target", "attacker", "mob", "entity", "projectile",
-                         "pushed", "livingTarget", "golem", "horse", "passenger", "user",
-                         "other", "serverPlayer", "first", "second"):
-            s = re.sub(rf"\b{receiver}\.getPos\(\)", f"{receiver}.position()", s)
-        s = re.sub(
-            r"\.multiply\(([-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?)\)",
-            r".scale(\1)",
-            s
-        )
+        s = s.replace(".getPos()", ".position()")
+        s = re.sub(r"\.multiply\(([^()]*)\)", r".scale(\1)", s)
         s = re.sub(
             r"\.breakBlock\(([^,\n]+),\s*([^,\n]+),\s*([^)]+)\)",
-            r".destroyBlock(\1, \2, \3, Level.MAX_UPDATE_DEPTH)",
+            r".destroyBlock(\1, \2, \3, 512)",
             s
         )
-        if "Level.MAX_UPDATE_DEPTH" in s:
-            s = ensure_import(s, "import net.minecraft.world.level.Level;")
         for constant in ENTITY_TYPE_CONSTANTS:
             s = s.replace(f"EntityType.{constant}", f"KccEntityTypes.{constant}")
         if "KccEntityTypes." in s:
@@ -87,15 +94,33 @@ for folder in (MAIN, CLIENT):
                 "sendParticles(ParticleTypes.DRAGON_BREATH",
                 "sendParticles(PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1.0F)"
             )
+        if "sendParticles(ParticleTypes.FLASH" in s:
+            s = s.replace(
+                "sendParticles(ParticleTypes.FLASH",
+                "sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFFF)"
+            )
         if "PowerParticleOption.create(" in s:
             s = ensure_import(s, "import net.minecraft.core.particles.PowerParticleOption;")
+        if "ColorParticleOption.create(" in s:
+            s = ensure_import(s, "import net.minecraft.core.particles.ColorParticleOption;")
         s = re.sub(r"\b(\w+)\.invulnerableTime\s*=\s*0\s*;", r"\1.setInvulnerableTime(0);", s)
+        s = re.sub(r"\b(target|living|player|mob|entity|wither)\.damage\(", r"\1.hurtServer(", s)
         s = s.replace("sendEquipmentBreakStatus(stack.getItem(),", "sendEquipmentBreakStatus(stack,")
         s = s.replace("onEquippedItemBroken(stack.getItem(),", "onEquippedItemBroken(stack,")
+        s = re.sub(
+            r"\.placeItemBackInInventory\(([^,()]+)\)",
+            r".placeItemBackInInventory(\1, false, Prediction.SERVER_ONLY)",
+            s
+        )
+        if ".placeItemBackInInventory(" in s:
+            s = ensure_import(s, "import net.minecraft.util.Prediction;")
+        s = s.replace(".intersects(hitPosition)", ".contains(hitPosition)")
+        s = s.replace(".intersects(entity.position())", ".contains(entity.position())")
         if path.name == "HandCannonItem.java":
-            s = s.replace(
-                'user.sendSystemMessage(Component.literal("副手需要火枪弹药"), true);',
-                'if (user instanceof ServerPlayer serverPlayer) serverPlayer.sendOverlayMessage(Component.literal("副手需要火枪弹药"));'
+            s = re.sub(
+                r'user\.sendSystemMessage\((.+),\s*true\);',
+                r'if (user instanceof ServerPlayer serverPlayer) serverPlayer.sendOverlayMessage(\1);',
+                s
             )
             if "serverPlayer.sendOverlayMessage" in s:
                 s = ensure_import(s, "import net.minecraft.server.level.ServerPlayer;")
