@@ -28,6 +28,9 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-rendering-v1:16.2.10+0290ad933e"
     // Mercury uses the plain Java compile classpath while resolving injected supertypes.
     compileOnly "net.fabricmc.fabric-api:fabric-rendering-v1:16.2.10+0290ad933e"
+    // FRAPI owns FabricLayerRenderState, injected into ItemStackRenderState by Fabric.
+    modImplementation "net.fabricmc.fabric-api:fabric-renderer-api-v1:8.0.3+f4ffd2e53e"
+    compileOnly "net.fabricmc.fabric-api:fabric-renderer-api-v1:8.0.3+f4ffd2e53e"
     modImplementation files("../../libs/PlayerAnimationLibFabric-1.1.7+mc.1.21.11.jar")
     modCompileOnly files("../../libs/geckolib-fabric-1.21.11-5.4.5.jar")
 }
