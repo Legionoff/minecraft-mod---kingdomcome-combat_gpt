@@ -1,8 +1,8 @@
 # Minecraft 26.3 port target
 
-The original 1.21.x Yarn sources remain untouched. The port process uses Fabric
-Loom's `migrateMappings` and `migrateClientMappings` tasks to create Mojang-mapped
-source copies, then compiles the isolated 26.3 target.
+The original 1.21.x Yarn sources remain untouched. The port process runs two
+Fabric Loom `migrateMappings` passes (main and client folders), applies API
+compatibility patches for Minecraft 26.2+, then compiles the isolated 26.3 target.
 
 ## Toolchain
 
@@ -22,12 +22,17 @@ source copies, then compiles the isolated 26.3 target.
 bash scripts/port-26.3.sh
 ```
 
-The same command is wired into `.github/workflows/build-26.3.yml`.
+The same command runs in `.github/workflows/build-26.3.yml`. GitHub Actions
+provides Java 25 and network access to the Gradle/Fabric/CurseMaven repositories.
 
-## Status
+## Porting notes
 
-Mapping conversion is automated, but it is not a substitute for the compile-and-fix
-cycle. Minecraft 26.3 changed APIs and renderer internals after 1.21.11. Compiler
-diagnostics, stale Mixin selectors and runtime injection failures still need to be
-fixed against the actual 26.3 game classes. Do not publish a JAR until CI succeeds
-and client/server smoke tests pass.
+- The old ItemGroupEvents registration is replaced with a dedicated Fabric creative tab.
+- Removed TradeOfferHelper villager offers are generated as data-driven trade definitions
+  for all configured skill books at librarian levels 2, 4 and 5.
+- Custom game rules use the 26.2+ GameRuleBuilder API and namespaced identifiers.
+- The combat manual recipe uses the 26.2+ CustomRecipe codec/stream-codec serializer API.
+
+This is still a compile-and-fix port, not a release claim. Stale Mixin selectors,
+API signatures, and runtime injection failures must be fixed against actual 26.3
+classes. Do not distribute a JAR until CI succeeds and client/server smoke tests pass.

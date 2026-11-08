@@ -7,6 +7,7 @@ on:
       - 'versions/26.3/**'
       - 'versions/migration/**'
       - 'scripts/port-26.3.sh'
+      - 'scripts/patch-26.3-mapped.py'
       - '.github/workflows/build-26.3.yml'
       - 'src/**'
 
@@ -24,7 +25,7 @@ jobs:
           java-version: '25'
       - name: Verify Java
         run: java -version
-      - name: Migrate Yarn sources and Mixin targets to Mojang mappings, then build
+      - name: Migrate Yarn sources and Mixin targets, patch 26.3 API changes, and build
         run: bash scripts/port-26.3.sh
       - name: Upload mod JAR
         uses: actions/upload-artifact@v4

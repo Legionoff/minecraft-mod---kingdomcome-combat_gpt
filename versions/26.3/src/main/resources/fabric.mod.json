@@ -3,13 +3,13 @@
   "id": "kingdom_come_combat",
   "version": "${version}",
   "name": "Kingdom Come Combat",
-  "description": "Minecraft combat inspired by Kingdom Come Deliverance 2: directional attacks, combos, parries, dodges and data-driven mechanics.",
+  "description": "Directional combat, combos, parries, dodges, stamina, injuries and data-driven combat systems inspired by Kingdom Come Deliverance 2.",
   "authors": ["DUCK goose"],
   "contact": {
     "homepage": "https://github.com/Legionoff/minecraft-mod---kingdomcome-combat_gpt",
     "sources": "https://github.com/Legionoff/minecraft-mod---kingdomcome-combat_gpt"
   },
-  "license": "CC0-1.0",
+  "license": "MIT",
   "icon": "assets/kingdom_come_combat/icon.png",
   "environment": "*",
   "entrypoints": {

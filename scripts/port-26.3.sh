@@ -12,17 +12,18 @@ fi
 rm -rf build/26.3-remapped
 mkdir -p build/26.3-remapped
 
+# Keep original Yarn sources intact; migrate main and client source folders separately.
 ./gradlew -p versions/migration migrateMappings \
   --mappings "net.minecraft:mappings:1.21.11" \
   --input "../../src/main/java" \
   --output "../../build/26.3-remapped/main"
 
-# Loom 1.17.21 exposes the general migration task in this setup; reuse it
-# with the client source folder as input to migrate the split client source set.
 ./gradlew -p versions/migration migrateMappings \
   --mappings "net.minecraft:mappings:1.21.11" \
   --input "../../src/client/java" \
   --output "../../build/26.3-remapped/client"
+
+python3 scripts/patch-26.3-mapped.py
 
 ./gradlew -p versions/26.3 clean build --stacktrace
 

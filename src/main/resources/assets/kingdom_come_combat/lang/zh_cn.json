@@ -331,5 +331,15 @@
   "subtitles.kingdom_come_combat.combat.hit.mace_body": "战锤击中身体",
   "subtitles.kingdom_come_combat.combat.hit.pommel": "剑柄击打",
   "subtitles.kingdom_come_combat.combat.hit.stab_in": "武器刺入血肉",
-  "subtitles.kingdom_come_combat.combat.weapon_clash.hit_sword": "刀剑碰撞"
+  "subtitles.kingdom_come_combat.combat.weapon_clash.hit_sword": "刀剑碰撞",
+  "kingdom_come_combat.kcc_classic_mode": "经典战斗模式",
+  "gamerule.kingdom_come_combat.kcc_classic_mode": "为非玩家攻击启用经典战斗模式。",
+  "kingdom_come_combat.kcc_player_directional_blocking": "玩家方向格挡",
+  "gamerule.kingdom_come_combat.kcc_player_directional_blocking": "玩家攻击需要正确的方向格挡。",
+  "kingdom_come_combat.kcc_combat_speed": "战斗速度",
+  "gamerule.kingdom_come_combat.kcc_combat_speed": "战斗动画速度倍率（0.05–10.0）。",
+  "kingdom_come_combat.kcc_trauma": "创伤系统",
+  "gamerule.kingdom_come_combat.kcc_trauma": "启用玩家受伤、流血和治疗后果。",
+  "kingdom_come_combat.kcc_hardcore_mode": "KCC 超级硬核模式",
+  "gamerule.kingdom_come_combat.kcc_hardcore_mode": "启用 Kingdom Come Combat 的硬核锁定规则。"
 }

@@ -331,5 +331,15 @@
   "subtitles.kingdom_come_combat.combat.hit.mace_body": "Mace strikes body",
   "subtitles.kingdom_come_combat.combat.hit.pommel": "Pommel strikes",
   "subtitles.kingdom_come_combat.combat.hit.stab_in": "Weapon stabs flesh",
-  "subtitles.kingdom_come_combat.combat.weapon_clash.hit_sword": "Swords clash"
+  "subtitles.kingdom_come_combat.combat.weapon_clash.hit_sword": "Swords clash",
+  "kingdom_come_combat.kcc_classic_mode": "Classic Mode",
+  "gamerule.kingdom_come_combat.kcc_classic_mode": "Enables classic combat mode for non-player attacks.",
+  "kingdom_come_combat.kcc_player_directional_blocking": "Player Directional Blocking",
+  "gamerule.kingdom_come_combat.kcc_player_directional_blocking": "Requires directional blocking against player attacks.",
+  "kingdom_come_combat.kcc_combat_speed": "Combat Speed",
+  "gamerule.kingdom_come_combat.kcc_combat_speed": "Multiplier for combat animation speed (0.05–10.0).",
+  "kingdom_come_combat.kcc_trauma": "Trauma",
+  "gamerule.kingdom_come_combat.kcc_trauma": "Enables player injury, bleeding and treatment consequences.",
+  "kingdom_come_combat.kcc_hardcore_mode": "KCC Hardcore Mode",
+  "gamerule.kingdom_come_combat.kcc_hardcore_mode": "Enables Kingdom Come Combat hardcore targeting rules."
 }

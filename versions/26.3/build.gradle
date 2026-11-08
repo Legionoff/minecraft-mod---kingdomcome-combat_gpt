@@ -30,6 +30,7 @@ loom {
 sourceSets {
     main {
         java.srcDir rootProject.file("../../build/26.3-remapped/main")
+        java.srcDir "src/main/java"
         resources.setSrcDirs([])
     }
     client {
@@ -53,6 +54,7 @@ processResources {
         exclude "fabric.mod.json"
     }
     from("src/main/resources")
+    from(rootProject.file("../../build/26.3-generated-resources"))
     inputs.property "version", project.version
     filesMatching("fabric.mod.json") {
         expand "version": project.version
