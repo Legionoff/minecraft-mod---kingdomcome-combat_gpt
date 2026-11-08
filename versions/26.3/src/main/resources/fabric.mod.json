@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "kingdom_come_combat",
+  "version": "${version}",
+  "name": "Kingdom Come Combat",
+  "description": "Minecraft combat inspired by Kingdom Come Deliverance 2: directional attacks, combos, parries, dodges and data-driven mechanics.",
+  "authors": ["DUCK goose"],
+  "contact": {
+    "homepage": "https://github.com/Legionoff/minecraft-mod---kingdomcome-combat_gpt",
+    "sources": "https://github.com/Legionoff/minecraft-mod---kingdomcome-combat_gpt"
+  },
+  "license": "CC0-1.0",
+  "icon": "assets/kingdom_come_combat/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.kingdomcomecombat.KingdomComeCombat"],
+    "client": ["com.kingdomcomecombat.client.KingdomComeCombatClient"],
+    "modmenu": ["com.kingdomcomecombat.client.config.KccModMenuIntegration"]
+  },
+  "mixins": [
+    "kingdom_come_combat.mixins.json",
+    {
+      "config": "kingdom_come_combat.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "26.3",
+    "java": ">=25",
+    "fabric-api": "*",
+    "cloth-config": ">=26.3.159",
+    "player_animation_library": "*"
+  },
+  "suggests": {
+    "firstperson": "*",
+    "geckolib": "*",
+    "modmenu": "*",
+    "modonomicon": "*",
+    "guardvillagers": "*",
+    "firstaid": "*",
+    "hundred_years_war": "*"
+  }
+}
