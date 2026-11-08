@@ -26,6 +26,8 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:0.141.6+1.21.11"
     // The mapping migrator resolves Fabric API supertypes referenced by Minecraft render-state classes.
     modImplementation "net.fabricmc.fabric-api:fabric-rendering-v1:0.141.6+1.21.11"
+    // Mercury uses the plain Java compile classpath while resolving injected supertypes.
+    compileOnly "net.fabricmc.fabric-api:fabric-rendering-v1:0.141.6+1.21.11"
     modImplementation files("../../libs/PlayerAnimationLibFabric-1.1.7+mc.1.21.11.jar")
     modCompileOnly files("../../libs/geckolib-fabric-1.21.11-5.4.5.jar")
 }
