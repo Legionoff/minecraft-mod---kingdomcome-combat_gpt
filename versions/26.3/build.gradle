@@ -40,11 +40,11 @@ sourceSets {
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-    modImplementation "curse.maven:player-animation-library-1283899:${project.player_animation_library_file}"
-    modImplementation "me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}"
-    modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+    implementation "curse.maven:player-animation-library-1283899:${project.player_animation_library_file}"
+    implementation "me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}"
+    compileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
     implementation "org.javassist:javassist:3.30.2-GA"
 }
 
