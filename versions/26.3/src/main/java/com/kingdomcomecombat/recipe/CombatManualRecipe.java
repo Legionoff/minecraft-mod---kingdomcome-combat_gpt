@@ -4,9 +4,11 @@ import com.kingdomcomecombat.KingdomComeCombat;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -49,9 +51,11 @@ public final class CombatManualRecipe extends CustomRecipe {
     }
 
     private static ItemStack createManualStack() {
-        Item item = BuiltInRegistries.ITEM.get(MODONOMICON_RED_ID);
+        Item item = BuiltInRegistries.ITEM.getValue(ResourceKey.create(Registries.ITEM, MODONOMICON_RED_ID));
         ItemStack stack = new ItemStack(item);
-        DataComponentType<?> componentType = BuiltInRegistries.DATA_COMPONENT_TYPE.get(MODONOMICON_BOOK_ID_COMPONENT);
+        DataComponentType<?> componentType = BuiltInRegistries.DATA_COMPONENT_TYPE.getValue(
+                ResourceKey.create(Registries.DATA_COMPONENT_TYPE, MODONOMICON_BOOK_ID_COMPONENT)
+        );
         setBookIdComponent(stack, componentType);
         return stack;
     }

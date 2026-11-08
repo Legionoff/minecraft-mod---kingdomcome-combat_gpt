@@ -46,7 +46,7 @@ public final class ModGameRules {
     public static void register() {
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> syncHardcoreMode(handler.player));
         ServerTickEvents.END_SERVER_TICK.register(server -> {
-            boolean current = hardcoreMode(server.getOverworld());
+            boolean current = hardcoreMode(server.overworld());
             if (server != lastSyncedServer || current != lastSyncedHardcoreMode) {
                 lastSyncedServer = server;
                 lastSyncedHardcoreMode = current;
@@ -57,10 +57,10 @@ public final class ModGameRules {
 
     public static void initializeForServer(MinecraftServer server) {
         if (server.isHardcore()) {
-            server.getOverworld().getGameRules().set(HARDCORE_MODE, true, server);
+            server.overworld().getGameRules().set(HARDCORE_MODE, true, server);
         }
         lastSyncedServer = server;
-        lastSyncedHardcoreMode = hardcoreMode(server.getOverworld());
+        lastSyncedHardcoreMode = hardcoreMode(server.overworld());
         syncHardcoreMode(server);
     }
 

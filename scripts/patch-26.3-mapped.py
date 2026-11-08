@@ -10,24 +10,117 @@ MAIN = ROOT / "build/26.3-remapped/main"
 CLIENT = ROOT / "build/26.3-remapped/client"
 GENERATED = ROOT / "build/26.3-generated-resources"
 
+def ensure_import(source: str, import_line: str) -> str:
+    if import_line not in source:
+        source = source.replace("\nimport ", "\n" + import_line + "\nimport ", 1)
+    return source
+
+ENTITY_TYPE_CONSTANTS = (
+    "HORSE", "CAMEL", "SKELETON", "STRAY", "WITHER_SKELETON", "ZOMBIE", "HUSK",
+    "DROWNED", "ZOMBIFIED_PIGLIN", "PIGLIN", "PIGLIN_BRUTE", "PILLAGER", "VINDICATOR",
+    "EVOKER", "ILLUSIONER", "WITCH", "VILLAGER", "WANDERING_TRADER",
+)
+
 for folder in (MAIN, CLIENT):
     for path in folder.rglob("*.java"):
         s = path.read_text(encoding="utf-8")
         s = s.replace(".getWorld()", ".level()")
+        s = s.replace(".getTime()", ".getGameTime()")
+        s = s.replace(".getOverworld()", ".overworld()")
+        s = s.replace(".getAdvancementLoader()", ".getAdvancements()")
+        s = s.replace(".getEntityById(", ".getEntity(")
+        s = s.replace(".getVelocity()", ".getDeltaMovement()")
+        s = s.replace(".getLightLevel(", ".getMaxLocalRawBrightness(")
+        s = re.sub(r"\.getEntitiesByClass\((\w+\.class),", r".getEntities(EntityTypeTest.forClass(\1),", s)
+        if ".getEntities(EntityTypeTest.forClass(" in s:
+            s = ensure_import(s, "import net.minecraft.world.level.entity.EntityTypeTest;")
+        s = s.replace(".getDamageSources()", ".damageSources()")
+        s = s.replace(".getOtherEntities(", ".getEntities(")
+        s = s.replace(".squaredDistanceTo(", ".distanceToSqr(")
+        s = s.replace(".raycast(", ".clip(")
+        s = s.replace(".dotProduct(", ".dot(")
         s = s.replace(".displayClientMessage(", ".sendSystemMessage(")
         s = s.replace(".velocityModified", ".needsSync")
         s = s.replace(".hasPermissionLevel(", ".hasPermission(")
+        s = s.replace(".isClient()", ".isClientSide()")
+        s = re.sub(r"\.isClientSide(?!\()", ".isClientSide()", s)
+        s = re.sub(r"\.isClient\b", ".isClientSide()", s)
         s = s.replace("net.minecraft.world.entity.monster.EnderMan", "net.minecraft.world.entity.monster.Enderman")
+        s = s.replace("EnderMan", "Enderman")
         s = s.replace("net.minecraft.world.entity.monster.Slime;", "net.minecraft.world.entity.monster.cubemob.Slime;")
-        for receiver in ("player", "target", "attacker", "mob", "entity", "projectile", "pushed", "livingTarget", "golem", "horse", "passenger", "user", "other", "serverPlayer", "first", "second"):
-            s = re.sub(rf"\b{receiver}\.getPos\(\)", f"{receiver}.position()", s)
+        s = s.replace("net.minecraft.server.world.ServerWorld", "net.minecraft.server.level.ServerLevel")
+        s = s.replace("ServerWorld", "ServerLevel")
+        s = s.replace("net.minecraft.entity.damage.DamageSource", "net.minecraft.world.damagesource.DamageSource")
+        s = s.replace("net.minecraft.util.math.Vec3d", "net.minecraft.world.phys.Vec3")
+        s = s.replace("Vec3d", "Vec3")
         s = s.replace("player.getServer()", "player.level().getServer()")
         s = s.replace("serverPlayer.getServer()", "serverPlayer.level().getServer()")
+        s = s.replace(
+            "player.level().getServer().isPvpEnabled()",
+            "player.level().getServer().getGlobalGameRules().get(GameRules.PVP)"
+        )
+        s = s.replace(".getType().is(", ".getType().builtInRegistryHolder().is(")
+        for receiver in ("this", "player", "target", "attacker", "mob", "entity", "projectile",
+                         "pushed", "livingTarget", "golem", "horse", "passenger", "user",
+                         "other", "serverPlayer", "first", "second"):
+            s = re.sub(rf"\b{receiver}\.getPos\(\)", f"{receiver}.position()", s)
+        s = re.sub(
+            r"\.multiply\(([-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?)\)",
+            r".scale(\1)",
+            s
+        )
+        s = re.sub(
+            r"\.breakBlock\(([^,\n]+),\s*([^,\n]+),\s*([^)]+)\)",
+            r".destroyBlock(\1, \2, \3, Level.MAX_UPDATE_DEPTH)",
+            s
+        )
+        if "Level.MAX_UPDATE_DEPTH" in s:
+            s = ensure_import(s, "import net.minecraft.world.level.Level;")
+        for constant in ENTITY_TYPE_CONSTANTS:
+            s = s.replace(f"EntityType.{constant}", f"KccEntityTypes.{constant}")
+        if "KccEntityTypes." in s:
+            s = ensure_import(s, "import com.kingdomcomecombat.compat.KccEntityTypes;")
+        if "GameRules.PVP" in s:
+            s = ensure_import(s, "import net.minecraft.world.level.gamerules.GameRules;")
+        if "sendParticles(ParticleTypes.DRAGON_BREATH" in s:
+            s = s.replace(
+                "sendParticles(ParticleTypes.DRAGON_BREATH",
+                "sendParticles(PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1.0F)"
+            )
+        if "PowerParticleOption.create(" in s:
+            s = ensure_import(s, "import net.minecraft.core.particles.PowerParticleOption;")
+        s = re.sub(r"\b(\w+)\.invulnerableTime\s*=\s*0\s*;", r"\1.setInvulnerableTime(0);", s)
+        s = s.replace("sendEquipmentBreakStatus(stack.getItem(),", "sendEquipmentBreakStatus(stack,")
+        s = s.replace("onEquippedItemBroken(stack.getItem(),", "onEquippedItemBroken(stack,")
+        if path.name == "HandCannonItem.java":
+            s = s.replace(
+                'user.sendSystemMessage(Component.literal("副手需要火枪弹药"), true);',
+                'if (user instanceof ServerPlayer serverPlayer) serverPlayer.sendOverlayMessage(Component.literal("副手需要火枪弹药"));'
+            )
+            if "serverPlayer.sendOverlayMessage" in s:
+                s = ensure_import(s, "import net.minecraft.server.level.ServerPlayer;")
         if re.search(r"\.drop\([^\n,]+,\s*false,\s*true\)", s):
             s = re.sub(r"\.drop\(([^\n,]+),\s*false,\s*true\)", r".drop(\1, false, Prediction.SERVER_ONLY)", s)
-            if "import net.minecraft.util.Prediction;" not in s:
-                s = s.replace("\nimport ", "\nimport net.minecraft.util.Prediction;\nimport ", 1)
+            s = ensure_import(s, "import net.minecraft.util.Prediction;")
+        if "DamageSource" in s:
+            s = ensure_import(s, "import net.minecraft.world.damagesource.DamageSource;")
+        if "ServerLevel" in s:
+            s = ensure_import(s, "import net.minecraft.server.level.ServerLevel;")
+        if "Vec3" in s:
+            s = ensure_import(s, "import net.minecraft.world.phys.Vec3;")
         path.write_text(s, encoding="utf-8")
+
+for commands in (next(MAIN.rglob("CombatCommands.java")), next(MAIN.rglob("CombatNetworking.java"))):
+    s = commands.read_text(encoding="utf-8")
+    s = re.sub(
+        r"\b(\w+)\.hasPermission\(2\)",
+        r"\1.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.GAMEMASTERS))",
+        s
+    )
+    if "Permission.HasCommandLevel" in s:
+        s = ensure_import(s, "import net.minecraft.server.permissions.Permission;")
+        s = ensure_import(s, "import net.minecraft.server.permissions.PermissionLevel;")
+    commands.write_text(s, encoding="utf-8")
 
 for rel in (
     "com/kingdomcomecombat/game/ModGameRules.java",
@@ -98,6 +191,11 @@ books = []
 for path in sorted(skill_dir.glob("*.json")):
     data = json.loads(path.read_text(encoding="utf-8"))
     books.append(data.get("id", path.stem))
+
+recipe = {"type": "kingdom_come_combat:combat_manual"}
+recipe_path = GENERATED / "data/kingdom_come_combat/recipe/combat_manual.json"
+recipe_path.parent.mkdir(parents=True, exist_ok=True)
+recipe_path.write_text(json.dumps(recipe, indent=2) + "\n", encoding="utf-8")
 
 for level, cost in ((2, 14), (4, 22), (5, 32)):
     values = []

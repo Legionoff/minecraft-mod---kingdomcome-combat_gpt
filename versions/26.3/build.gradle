@@ -59,6 +59,16 @@ processResources {
     filesMatching("fabric.mod.json") {
         expand "version": project.version
     }
+    filesMatching("assets/kingdom_come_combat/lang/*.json") {
+        filter { String line ->
+            if (!line.contains("book.kingdom_come_combat.")) return line
+            line.replace("kccClassicMode", "kingdom_come_combat:kcc_classic_mode")
+                .replace("kccPlayerDirectionalBlocking", "kingdom_come_combat:kcc_player_directional_blocking")
+                .replace("kccCombatSpeed", "kingdom_come_combat:kcc_combat_speed")
+                .replace("kccTrauma", "kingdom_come_combat:kcc_trauma")
+                .replace("kccHardcoreMode", "kingdom_come_combat:kcc_hardcore_mode")
+        }
+    }
 }
 
 ["processResources", "processClientResources"].each { taskName ->
