@@ -13,15 +13,29 @@ rm -rf build/26.3-remapped
 mkdir -p build/26.3-remapped
 
 # Keep original Yarn sources intact; migrate main and client source folders separately.
-./gradlew -p versions/migration migrateMappings \
-  --mappings "net.minecraft:mappings:1.21.11" \
-  --input "../../src/main/java" \
-  --output "../../build/26.3-remapped/main"
+# Loom's task can exit successfully even when Mercury reports a type-resolution error.
+migrate_sources() {
+  local input="$1"
+  local output="$2"
+  local log_file
+  log_file="$(mktemp)"
+  if ! ./gradlew -p versions/migration migrateMappings \
+    --mappings "net.minecraft:mappings:1.21.11" \
+    --input "$input" \
+    --output "$output" 2>&1 | tee "$log_file"; then
+    rm -f "$log_file"
+    return 1
+  fi
+  if grep -q "Status ERROR:" "$log_file"; then
+    echo "ERROR: source mapping reported unresolved types; refusing to compile partially migrated sources." >&2
+    rm -f "$log_file"
+    return 1
+  fi
+  rm -f "$log_file"
+}
 
-./gradlew -p versions/migration migrateMappings \
-  --mappings "net.minecraft:mappings:1.21.11" \
-  --input "../../src/client/java" \
-  --output "../../build/26.3-remapped/client"
+migrate_sources "../../src/main/java" "../../build/26.3-remapped/main"
+migrate_sources "../../src/client/java" "../../build/26.3-remapped/client"
 
 python3 scripts/patch-26.3-mapped.py
 
