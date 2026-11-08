@@ -49,6 +49,7 @@ for folder in (MAIN, CLIENT):
             ".hasPermissionLevel(": ".hasPermission(",
             ".isClient()": ".isClientSide()",
             ".getClosestPlayer(": ".getNearestPlayer(",
+            ".canSee(": ".hasLineOfSight(",
             ".isSpaceEmpty(": ".noCollision(",
             ".expand(": ".inflate(",
             ".canHit()": ".isPickable()",
@@ -60,6 +61,7 @@ for folder in (MAIN, CLIENT):
         }
         for old, new in replacements.items():
             s = s.replace(old, new)
+        s = s.replace("context.getOptionalParameter(", "context.getOptional(")
         s = re.sub(r"\.isClientSide(?!\()", ".isClientSide()", s)
         s = re.sub(r"\.isClient\b", ".isClientSide()", s)
         s = s.replace("EnderMan", "Enderman")
@@ -78,6 +80,8 @@ for folder in (MAIN, CLIENT):
         s = s.replace(".getType().is(", ".getType().builtInRegistryHolder().is(")
         s = s.replace(".getPos()", ".position()")
         s = re.sub(r"\.multiply\(([^()]*)\)", r".scale(\1)", s)
+        if path.name == "ServerHitDetectionSystem.java":
+            s = s.replace(".scale(move);", ".multiply(move);")
         s = re.sub(
             r"\.breakBlock\(([^,\n]+),\s*([^,\n]+),\s*([^)]+)\)",
             r".destroyBlock(\1, \2, \3, 512)",
@@ -89,16 +93,16 @@ for folder in (MAIN, CLIENT):
             s = ensure_import(s, "import com.kingdomcomecombat.compat.KccEntityTypes;")
         if "GameRules.PVP" in s:
             s = ensure_import(s, "import net.minecraft.world.level.gamerules.GameRules;")
-        if "sendParticles(ParticleTypes.DRAGON_BREATH" in s:
-            s = s.replace(
-                "sendParticles(ParticleTypes.DRAGON_BREATH",
-                "sendParticles(PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1.0F)"
-            )
-        if "sendParticles(ParticleTypes.FLASH" in s:
-            s = s.replace(
-                "sendParticles(ParticleTypes.FLASH",
-                "sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFFF)"
-            )
+        s = re.sub(
+            r"sendParticles\(\s*ParticleTypes\.DRAGON_BREATH",
+            "sendParticles(PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1.0F)",
+            s
+        )
+        s = re.sub(
+            r"sendParticles\(\s*ParticleTypes\.FLASH",
+            "sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFFF)",
+            s
+        )
         if "PowerParticleOption.create(" in s:
             s = ensure_import(s, "import net.minecraft.core.particles.PowerParticleOption;")
         if "ColorParticleOption.create(" in s:
@@ -116,6 +120,8 @@ for folder in (MAIN, CLIENT):
             s = ensure_import(s, "import net.minecraft.util.Prediction;")
         s = s.replace(".intersects(hitPosition)", ".contains(hitPosition)")
         s = s.replace(".intersects(entity.position())", ".contains(entity.position())")
+        if path.name == "PersistentProjectileExtendedHeadHitboxMixin.java":
+            s = s.replace("canHit(", "canHitEntity(")
         if path.name == "HandCannonItem.java":
             s = re.sub(
                 r'user\.sendSystemMessage\((.+),\s*true\);',
